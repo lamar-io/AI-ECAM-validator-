@@ -2,695 +2,149 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>AI-ECAM Sensor Validation System</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;900&family=IBM+Plex+Mono:wght@300;400;500;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --bg:#030912;
-  --surface:#060f1e;
-  --surface2:#091526;
-  --border:rgba(0,170,255,0.12);
-  --border2:rgba(0,170,255,0.06);
-  --blue:#00aaff;
-  --blue2:#0066cc;
-  --cyan:#00e5ff;
-  --green:#00ff88;
-  --amber:#ffaa00;
-  --red:#ff3355;
-  --text:#ddeeff;
-  --muted:rgba(221,238,255,0.45);
-  --dim:rgba(221,238,255,0.2);
-  --font-display:'Orbitron',monospace;
-  --font-mono:'IBM Plex Mono',monospace;
-  --font-body:'IBM Plex Sans',sans-serif;
-}
-
-html{scroll-behavior:smooth}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--font-body);
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* ── GRID BG ── */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(0,170,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,170,255,0.025) 1px,transparent 1px);
-  background-size:50px 50px;pointer-events:none;z-index:0;
-}
-
-/* ── NAV ── */
-nav{
-  position:sticky;top:0;z-index:100;
-  background:rgba(3,9,18,0.92);
-  backdrop-filter:blur(16px);
-  border-bottom:1px solid var(--border);
-  padding:0 40px;
-  display:flex;align-items:center;justify-content:space-between;
-  height:56px;
-}
-.nav-brand{
-  font-family:var(--font-display);
-  font-size:11px;font-weight:700;
-  letter-spacing:3px;color:var(--blue);
-  display:flex;align-items:center;gap:10px;
-}
-.nav-dot{width:7px;height:7px;background:var(--green);border-radius:50%;position:relative;}
-.nav-dot::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid var(--green);animation:pulse 2s infinite;}
-@keyframes pulse{0%{transform:scale(1);opacity:1}100%{transform:scale(2.2);opacity:0}}
-
-.nav-tabs{display:flex;gap:2px;}
-.nav-tab{
-  font-family:var(--font-mono);font-size:10px;
-  letter-spacing:1.5px;text-transform:uppercase;
-  padding:6px 16px;cursor:pointer;
-  border:1px solid transparent;
-  color:var(--muted);transition:all 0.2s;
-  background:none;
-}
-.nav-tab:hover,.nav-tab.active{
-  color:var(--blue);
-  border-color:var(--border);
-  background:rgba(0,170,255,0.05);
-}
-.nav-status{
-  font-family:var(--font-mono);font-size:9px;
-  color:var(--green);letter-spacing:2px;
-  display:flex;align-items:center;gap:6px;
-}
-
-/* ── SECTIONS ── */
-.section{
-  display:none;
-  min-height:calc(100vh - 56px);
-  padding:40px;
-  position:relative;z-index:1;
-  animation:sectionIn 0.4s ease forwards;
-}
-.section.active{display:block;}
-@keyframes sectionIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-
-/* ── SECTION HEADER ── */
-.section-header{margin-bottom:36px;}
-.section-eyebrow{
-  font-family:var(--font-mono);font-size:9px;
-  letter-spacing:3px;color:var(--blue);
-  text-transform:uppercase;margin-bottom:8px;opacity:0.7;
-}
-.section-title{
-  font-family:var(--font-display);font-size:28px;
-  font-weight:700;letter-spacing:1px;line-height:1.2;
-}
-.section-title .accent{color:var(--blue);}
-.section-desc{
-  font-size:13px;color:var(--muted);
-  max-width:680px;line-height:1.7;margin-top:10px;
-}
-
-/* ── OVERVIEW ── */
-.overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:32px;}
-
-.card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  padding:24px;position:relative;overflow:hidden;
-}
-.card::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,transparent,var(--blue),transparent);
-  opacity:0;transition:opacity 0.3s;
-}
-.card:hover::before{opacity:1;}
-
-.card-label{
-  font-family:var(--font-mono);font-size:9px;
-  letter-spacing:2.5px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:12px;
-}
-.card-title{
-  font-family:var(--font-display);font-size:14px;
-  font-weight:600;letter-spacing:0.5px;margin-bottom:10px;
-}
-.card-body{font-size:12.5px;color:var(--muted);line-height:1.75;}
-
-.problem-card{border-color:rgba(255,51,85,0.2);background:rgba(255,51,85,0.03);}
-.problem-card .card-title{color:var(--red);}
-.solution-card{border-color:rgba(0,229,255,0.2);background:rgba(0,229,255,0.03);}
-.solution-card .card-title{color:var(--cyan);}
-
-.impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.impact-box{
-  background:var(--surface);border:1px solid var(--border);
-  padding:20px;text-align:center;
-}
-.impact-num{
-  font-family:var(--font-display);font-size:30px;
-  font-weight:700;color:var(--blue);letter-spacing:2px;
-  display:block;margin-bottom:4px;
-}
-.impact-num.green{color:var(--green);}
-.impact-num.amber{color:var(--amber);}
-.impact-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;color:var(--muted);}
-
-/* ── PIPELINE ── */
-.pipeline-container{position:relative;}
-.pipeline-flow{
-  display:flex;align-items:center;
-  background:var(--surface);border:1px solid var(--border);
-  padding:28px 32px;margin-bottom:24px;
-  overflow-x:auto;gap:0;
-}
-.pnode{
-  display:flex;flex-direction:column;align-items:center;
-  gap:10px;flex-shrink:0;cursor:pointer;
-  padding:12px;transition:all 0.25s;
-  border:1px solid transparent;min-width:110px;
-}
-.pnode:hover,.pnode.selected{
-  border-color:var(--border);
-  background:rgba(0,170,255,0.05);
-}
-.pnode.selected .pnode-icon{box-shadow:0 0 24px rgba(0,170,255,0.3);}
-
-.pnode-icon{
-  width:60px;height:60px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;border:1px solid;position:relative;
-}
-.pnode.n-sensor .pnode-icon{border-color:rgba(255,170,0,0.4);background:rgba(255,170,0,0.05);}
-.pnode.n-arinc .pnode-icon{border-color:rgba(0,170,255,0.4);background:rgba(0,170,255,0.05);}
-.pnode.n-kalman .pnode-icon{border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.05);}
-.pnode.n-lstm .pnode-icon{border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.05);}
-.pnode.n-iso .pnode-icon{border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.05);}
-.pnode.n-rf .pnode-icon{border-color:rgba(0,229,255,0.4);background:rgba(0,229,255,0.05);}
-.pnode.n-edge .pnode-icon{border-color:rgba(0,255,136,0.4);background:rgba(0,255,136,0.05);}
-.pnode.n-ecam .pnode-icon{border-color:rgba(0,170,255,0.5);background:rgba(0,170,255,0.07);box-shadow:0 0 20px rgba(0,170,255,0.08);}
-
-.pnode-name{
-  font-family:var(--font-display);font-size:8px;
-  font-weight:600;letter-spacing:1px;text-transform:uppercase;
-  text-align:center;color:var(--muted);
-}
-.pnode-sub{font-family:var(--font-mono);font-size:8px;color:var(--dim);text-align:center;}
-
-.p-arrow{
-  display:flex;flex-direction:column;align-items:center;
-  gap:3px;padding:0 4px;flex-shrink:0;
-}
-.p-arrow-line{
-  width:32px;height:1px;position:relative;
-}
-.p-arrow-line::before{
-  content:'';position:absolute;top:0;left:0;right:8px;height:1px;
-  background:linear-gradient(90deg,rgba(0,170,255,0.15),rgba(0,170,255,0.5));
-}
-.p-arrow-line::after{
-  content:'';position:absolute;top:-3px;right:0;
-  width:0;height:0;
-  border-top:4px solid transparent;
-  border-bottom:4px solid transparent;
-  border-left:7px solid rgba(0,170,255,0.5);
-}
-.p-arrow-tag{font-family:var(--font-mono);font-size:7px;color:rgba(0,170,255,0.35);letter-spacing:0.5px;}
-
-/* Node detail panel */
-.node-detail{
-  background:var(--surface);border:1px solid var(--border);
-  padding:28px 32px;display:none;
-  animation:detailIn 0.3s ease;
-}
-.node-detail.open{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;}
-@keyframes detailIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-
-.detail-section{}
-.detail-heading{
-  font-family:var(--font-display);font-size:10px;
-  font-weight:700;letter-spacing:2px;color:var(--cyan);
-  text-transform:uppercase;margin-bottom:12px;
-  padding-bottom:8px;border-bottom:1px solid rgba(0,229,255,0.15);
-}
-.detail-body{font-size:12px;color:var(--muted);line-height:1.8;}
-.detail-list{list-style:none;}
-.detail-list li{
-  font-size:11.5px;color:var(--muted);
-  padding:5px 0;border-bottom:1px solid var(--border2);
-  display:flex;align-items:flex-start;gap:8px;line-height:1.5;
-}
-.detail-list li::before{content:'›';color:var(--blue);flex-shrink:0;margin-top:1px;}
-
-.hint{
-  font-family:var(--font-mono);font-size:9px;
-  color:rgba(0,170,255,0.4);letter-spacing:1px;
-  margin-bottom:12px;
-}
-
-/* ── SIMULATION ── */
-.sim-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;}
-.sim-main{}
-.sim-sidebar{}
-
-.sim-chart-box{
-  background:var(--surface);border:1px solid var(--border);
-  padding:20px;margin-bottom:16px;
-}
-.sim-chart-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:16px;
-}
-.sim-chart-title{font-family:var(--font-display);font-size:11px;letter-spacing:1px;color:var(--text);}
-.sim-legend{display:flex;gap:16px;}
-.legend-item{display:flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;color:var(--muted);}
-.legend-dot{width:8px;height:8px;border-radius:50%;}
-
-canvas{width:100%;display:block;}
-
-.sim-controls{
-  background:var(--surface);border:1px solid var(--border);padding:20px;
-  margin-bottom:16px;
-}
-.controls-title{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;}
-.ctrl-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
-.ctrl-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);width:140px;flex-shrink:0;}
-.ctrl-slider{
-  flex:1;-webkit-appearance:none;appearance:none;
-  height:2px;background:rgba(0,170,255,0.2);outline:none;cursor:pointer;
-}
-.ctrl-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;width:14px;height:14px;
-  border-radius:0;background:var(--blue);cursor:pointer;
-  box-shadow:0 0 8px rgba(0,170,255,0.5);
-}
-.ctrl-val{font-family:var(--font-mono);font-size:10px;color:var(--blue);width:40px;text-align:right;}
-
-.btn-row{display:flex;gap:10px;margin-top:16px;}
-.btn{
-  font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;
-  text-transform:uppercase;padding:9px 20px;cursor:pointer;
-  border:1px solid;transition:all 0.2s;background:none;
-}
-.btn-primary{border-color:var(--blue);color:var(--blue);}
-.btn-primary:hover{background:rgba(0,170,255,0.1);}
-.btn-danger{border-color:var(--red);color:var(--red);}
-.btn-danger:hover{background:rgba(255,51,85,0.08);}
-.btn-success{border-color:var(--green);color:var(--green);}
-.btn-success:hover{background:rgba(0,255,136,0.08);}
-
-/* Alerts feed */
-.alerts-box{
-  background:var(--surface);border:1px solid var(--border);
-  padding:20px;margin-bottom:16px;
-}
-.alerts-header{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-bottom:14px;
-}
-.alerts-title{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;}
-.alert-count{
-  font-family:var(--font-display);font-size:14px;
-  font-weight:700;color:var(--red);
-}
-.alert-count.safe{color:var(--green);}
-
-.alert-feed{max-height:200px;overflow-y:auto;}
-.alert-item{
-  display:flex;align-items:flex-start;gap:8px;
-  padding:6px 0;border-bottom:1px solid var(--border2);
-  font-family:var(--font-mono);font-size:10px;
-  animation:alertIn 0.3s ease;
-}
-@keyframes alertIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
-.alert-time{color:var(--dim);flex-shrink:0;min-width:40px;}
-.alert-status{font-weight:700;flex-shrink:0;}
-.alert-status.warn{color:var(--red);}
-.alert-status.ok{color:var(--green);}
-.alert-status.filter{color:var(--amber);}
-.alert-msg{color:var(--muted);line-height:1.4;}
-
-/* Metrics sidebar */
-.metrics-box{
-  background:var(--surface);border:1px solid var(--border);
-  padding:20px;margin-bottom:16px;
-}
-.metrics-title{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:16px;}
-
-.metric-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:8px 0;border-bottom:1px solid var(--border2);
-}
-.metric-row:last-child{border-bottom:none;}
-.mr-label{font-family:var(--font-mono);font-size:10px;color:var(--muted);}
-.mr-val{font-family:var(--font-display);font-size:13px;font-weight:600;}
-.mr-val.good{color:var(--green);}
-.mr-val.warn{color:var(--amber);}
-.mr-val.bad{color:var(--red);}
-.mr-val.neutral{color:var(--blue);}
-
-.pipeline-status{
-  background:var(--surface);border:1px solid var(--border);padding:20px;
-}
-.ps-title{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:14px;}
-.ps-stage{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 0;border-bottom:1px solid var(--border2);
-}
-.ps-stage:last-child{border-bottom:none;}
-.ps-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.ps-dot.active{background:var(--green);box-shadow:0 0 8px rgba(0,255,136,0.5);}
-.ps-dot.idle{background:rgba(221,238,255,0.2);}
-.ps-name{font-family:var(--font-mono);font-size:10px;color:var(--muted);flex:1;}
-.ps-stat{font-family:var(--font-mono);font-size:9px;color:var(--dim);}
-
-/* ── TESTING ── */
-.test-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
-
-.test-card{
-  background:var(--surface);border:1px solid var(--border);padding:24px;
-}
-.test-card-title{
-  font-family:var(--font-display);font-size:12px;letter-spacing:1px;
-  font-weight:600;margin-bottom:6px;
-}
-.test-card-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px;}
-
-.test-scenario{
-  display:flex;align-items:center;gap:10px;
-  padding:8px 12px;margin-bottom:6px;
-  background:rgba(0,0,0,0.2);border:1px solid var(--border2);
-  cursor:pointer;transition:all 0.2s;font-family:var(--font-mono);font-size:10px;
-}
-.test-scenario:hover{border-color:var(--border);background:rgba(0,170,255,0.05);}
-.test-scenario.running{border-color:var(--amber);color:var(--amber);}
-.test-scenario.passed{border-color:var(--green);color:var(--green);}
-.test-scenario.failed{border-color:var(--red);color:var(--red);}
-.ts-icon{font-size:12px;flex-shrink:0;}
-.ts-name{flex:1;color:var(--muted);}
-.test-scenario.running .ts-name{color:var(--amber);}
-.test-scenario.passed .ts-name{color:var(--green);}
-.test-scenario.failed .ts-name{color:var(--red);}
-.ts-badge{
-  font-size:8px;letter-spacing:1px;
-  padding:2px 7px;border:1px solid currentColor;
-}
-
-.progress-bar-wrap{margin-top:16px;}
-.progress-label{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;
-  color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;
-}
-.progress-bar{
-  height:3px;background:rgba(0,170,255,0.1);
-  position:relative;overflow:hidden;
-}
-.progress-fill{
-  height:100%;background:var(--blue);
-  transition:width 0.4s ease;
-}
-.progress-fill.green{background:var(--green);}
-
-/* metrics table */
-.metrics-table{width:100%;border-collapse:collapse;margin-top:16px;}
-.metrics-table th{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--muted);
-  padding:8px 12px;text-align:left;
-  border-bottom:1px solid var(--border);
-}
-.metrics-table td{
-  font-family:var(--font-mono);font-size:11px;
-  padding:9px 12px;border-bottom:1px solid var(--border2);color:var(--text);
-}
-.metrics-table td.good{color:var(--green);}
-.metrics-table td.warn{color:var(--amber);}
-.metrics-table td.bad{color:var(--red);}
-
-/* ── TECH ── */
-.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
-.tech-card{
-  background:var(--surface);border:1px solid var(--border);
-  padding:22px;cursor:pointer;transition:all 0.25s;position:relative;
-  overflow:hidden;
-}
-.tech-card::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
-  background:var(--cyan);transform:scaleX(0);transition:transform 0.3s;
-}
-.tech-card:hover::after,.tech-card.expanded::after{transform:scaleX(1);}
-.tech-card:hover,.tech-card.expanded{border-color:rgba(0,229,255,0.25);background:rgba(0,229,255,0.03);}
-
-.tc-num{font-family:var(--font-mono);font-size:9px;color:var(--cyan);opacity:0.5;letter-spacing:1px;margin-bottom:6px;}
-.tc-name{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:0.5px;color:var(--cyan);margin-bottom:6px;}
-.tc-role{font-family:var(--font-mono);font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:10px;}
-.tc-desc{font-size:11.5px;color:var(--muted);line-height:1.7;}
-.tc-expand{display:none;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,229,255,0.1);}
-.tech-card.expanded .tc-expand{display:block;}
-.tc-detail-list{list-style:none;}
-.tc-detail-list li{
-  font-size:11px;color:var(--muted);padding:4px 0;
-  display:flex;align-items:flex-start;gap:7px;line-height:1.5;
-}
-.tc-detail-list li::before{content:'—';color:var(--cyan);flex-shrink:0;}
-
-/* scrollbar */
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:rgba(0,170,255,0.2);border-radius:2px;}
-
-/* tooltip */
-.tooltip{
-  position:absolute;z-index:200;
-  background:var(--surface2);border:1px solid var(--border);
-  padding:10px 14px;font-family:var(--font-mono);font-size:10px;
-  color:var(--text);pointer-events:none;display:none;max-width:220px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.6);line-height:1.6;
-}
-
-/* tag */
-.tag{
-  display:inline-block;font-family:var(--font-mono);font-size:8px;
-  letter-spacing:1px;padding:2px 8px;border:1px solid;margin:2px;
-}
-.tag-blue{border-color:rgba(0,170,255,0.3);color:var(--blue);background:rgba(0,170,255,0.05);}
-.tag-green{border-color:rgba(0,255,136,0.3);color:var(--green);background:rgba(0,255,136,0.05);}
-.tag-amber{border-color:rgba(255,170,0,0.3);color:var(--amber);background:rgba(255,170,0,0.05);}
-
-.corner-tl,.corner-br{position:absolute;width:16px;height:16px;border-color:var(--border);border-style:solid;}
-.corner-tl{top:8px;left:8px;border-width:1px 0 0 1px;}
-.corner-br{bottom:8px;right:8px;border-width:0 1px 1px 0;}
-
-/* flight phase selector */
-.phase-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.phase-btn{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;
-  text-transform:uppercase;padding:6px 14px;cursor:pointer;
-  border:1px solid var(--border2);color:var(--dim);
-  background:none;transition:all 0.2s;
-}
-.phase-btn:hover,.phase-btn.active{
-  border-color:var(--amber);color:var(--amber);background:rgba(255,170,0,0.05);
-}
-
-/* full-width card */
-.full-card{
-  background:var(--surface);border:1px solid var(--border);
-  padding:24px;margin-bottom:16px;
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- GITHUB WATERMARK -->
+<a href="https://github.com/lamar-io/AI-ECAM-validator-" target="_blank" class="github-link">
+  <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+  </svg>
+  <span>VIEW ON GITHUB</span>
+</a>
+
 <!-- NAV -->
 <nav>
-  <div class="nav-brand">
-    <div class="nav-dot"></div>
-    AI-ECAM VALIDATOR
-  </div>
+  <div class="nav-brand"><div class="nav-dot"></div>AI-ECAM VALIDATOR</div>
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showSection('overview')">Overview</button>
-    <button class="nav-tab" onclick="showSection('pipeline')">Architecture</button>
-    <button class="nav-tab" onclick="showSection('simulation')">Live Simulation</button>
-    <button class="nav-tab" onclick="showSection('testing')">Testing Plan</button>
-    <button class="nav-tab" onclick="showSection('tech')">Technologies</button>
+    <button class="nav-tab active" onclick="showSection('overview',this)">Overview</button>
+    <button class="nav-tab" onclick="showSection('pipeline',this)">Architecture</button>
+    <button class="nav-tab" onclick="showSection('simulation',this)">Simulation</button>
+    <button class="nav-tab" onclick="showSection('testing',this)">Testing</button>
+    <button class="nav-tab" onclick="showSection('tech',this)">Technologies</button>
   </div>
-  <div class="nav-status">● PROTOTYPE v0.1</div>
+  <div class="nav-status">● v0.1</div>
 </nav>
 
-<!-- ═══════════════════════════════════════ OVERVIEW ═══════ -->
+<!-- ═══ OVERVIEW ═══ -->
 <div class="section active" id="section-overview">
   <div class="section-header">
     <div class="section-eyebrow">Airbus Hackathon · Problem Statement 1</div>
     <h1 class="section-title">Intelligent Sensor Validation<br>for <span class="accent">ECAM</span> Systems</h1>
     <p class="section-desc">The Electronic Centralized Aircraft Monitor (ECAM) relies on raw sensor data to generate pilot alerts. When sensors produce inaccurate or inconsistent readings, the system generates false warnings — increasing pilot workload and reducing trust in real alerts. This project introduces an AI-based filtering layer that intercepts sensor data via the ARINC 429 bus, validates it in real time, and re-injects only trusted readings into the ECAM system.</p>
   </div>
-
   <div class="overview-grid">
     <div class="card problem-card" style="position:relative">
       <div class="corner-tl"></div><div class="corner-br"></div>
       <div class="card-label">Root Problem</div>
       <div class="card-title">⚠ Sensor Data Unreliability</div>
-      <div class="card-body">
-        ECAM sensors occasionally produce readings that are inaccurate or inconsistent with the aircraft's actual state. These faulty readings bypass any validation layer and directly trigger cockpit warnings — even when no real fault exists.<br><br>
-        In high-stress flight scenarios, false alerts increase pilot cognitive load, create alarm fatigue, and risk diverting attention from actual emergencies. The Qantas Flight 32 incident generated over 80 ECAM alerts in one hour — a documented case of alert overload.
-      </div>
+      <div class="card-body">ECAM sensors occasionally produce readings that are inaccurate or inconsistent with the aircraft's actual state. These faulty readings bypass any validation layer and directly trigger cockpit warnings — even when no real fault exists.<br><br>In high-stress flight scenarios, false alerts increase pilot cognitive load, create alarm fatigue, and risk diverting attention from actual emergencies. The Qantas Flight 32 incident generated over 80 ECAM alerts in one hour — a documented case of alert overload.</div>
     </div>
     <div class="card solution-card" style="position:relative">
       <div class="corner-tl"></div><div class="corner-br"></div>
       <div class="card-label">Proposed Solution</div>
       <div class="card-title">◈ AI-Based Filtering Pipeline</div>
-      <div class="card-body">
-        An intelligent preprocessing layer is inserted between the aircraft's physical sensors and the ECAM processing units. Operating on the ARINC 429 data bus — the standard avionics communication protocol in Airbus A320/A330/A340 — the pipeline applies a multi-stage AI stack to validate each sensor reading before it reaches the ECAM system.<br><br>
-        Only readings that pass all validation stages are re-injected into the bus. Rejected readings are logged for maintenance review.
-      </div>
+      <div class="card-body">An intelligent preprocessing layer is inserted between the aircraft's physical sensors and the ECAM processing units. Operating on the ARINC 429 data bus — the standard avionics communication protocol in Airbus A320/A330/A340 — the pipeline applies a multi-stage AI stack to validate each sensor reading before it reaches the ECAM system.<br><br>Only readings that pass all validation stages are re-injected into the bus. Rejected readings are logged for maintenance review.</div>
     </div>
   </div>
-
   <div class="full-card">
     <div class="card-label">Sustainability & Safety Impact</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:8px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:8px;">
       <div>
-        <div style="font-family:var(--font-display);font-size:11px;color:var(--green);letter-spacing:1px;margin-bottom:8px;">✦ Flight Safety</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.75;">Reduces false alerts reaching pilots, decreasing alarm fatigue during critical flight phases. Ensures pilots respond only to genuine system faults.</div>
+        <div style="font-family:var(--font-display);font-size:10px;color:var(--green);letter-spacing:1px;margin-bottom:6px;">✦ Flight Safety</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.75;">Reduces false alerts reaching pilots, decreasing alarm fatigue during critical flight phases. Ensures pilots respond only to genuine system faults.</div>
       </div>
       <div>
-        <div style="font-family:var(--font-display);font-size:11px;color:var(--amber);letter-spacing:1px;margin-bottom:8px;">✦ Operational Efficiency</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.75;">Fewer false maintenance groundings reduce unscheduled downtime and fuel waste from delayed or rerouted flights. Rejected sensor logs enable predictive maintenance.</div>
+        <div style="font-family:var(--font-display);font-size:10px;color:var(--amber);letter-spacing:1px;margin-bottom:6px;">✦ Operational Efficiency</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.75;">Fewer false maintenance groundings reduce unscheduled downtime and fuel waste from delayed or rerouted flights. Rejected sensor logs enable predictive maintenance.</div>
       </div>
       <div>
-        <div style="font-family:var(--font-display);font-size:11px;color:var(--blue);letter-spacing:1px;margin-bottom:8px;">✦ Environmental</div>
-        <div style="font-size:12px;color:var(--muted);line-height:1.75;">More accurate engine parameter readings enable better fuel management decisions. Fewer unnecessary ground holds and diversions reduce per-flight emissions.</div>
+        <div style="font-family:var(--font-display);font-size:10px;color:var(--blue);letter-spacing:1px;margin-bottom:6px;">✦ Environmental</div>
+        <div style="font-size:11.5px;color:var(--muted);line-height:1.75;">More accurate engine parameter readings enable better fuel management decisions. Fewer unnecessary ground holds and diversions reduce per-flight emissions.</div>
       </div>
     </div>
   </div>
-
   <div class="impact-grid">
-    <div class="impact-box">
-      <span class="impact-num">↓ 60%</span>
-      <div class="impact-label">Target False Alert Reduction</div>
-    </div>
-    <div class="impact-box">
-      <span class="impact-num green">4</span>
-      <div class="impact-label">AI Validation Stages</div>
-    </div>
-    <div class="impact-box">
-      <span class="impact-num amber">&lt;5ms</span>
-      <div class="impact-label">Target Pipeline Latency</div>
-    </div>
+    <div class="impact-box"><span class="impact-num">↓ 60%</span><div class="impact-label">Target False Alert Reduction</div></div>
+    <div class="impact-box"><span class="impact-num green">4</span><div class="impact-label">AI Validation Stages</div></div>
+    <div class="impact-box"><span class="impact-num amber">&lt;5ms</span><div class="impact-label">Target Pipeline Latency</div></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ PIPELINE ═══════ -->
+<!-- ═══ PIPELINE ═══ -->
 <div class="section" id="section-pipeline">
   <div class="section-header">
     <div class="section-eyebrow">System Architecture</div>
     <h1 class="section-title">Data Flow <span class="accent">Pipeline</span></h1>
     <p class="section-desc">Click any node in the pipeline below to explore its role, inputs, outputs, and technical implementation.</p>
   </div>
-
-  <div class="hint">▸ CLICK A NODE TO INSPECT</div>
-
+  <div class="hint">▸ CLICK A NODE TO INSPECT · SCROLL HORIZONTALLY ON MOBILE</div>
   <div class="pipeline-container">
     <div class="pipeline-flow">
-      <div class="pnode n-sensor" onclick="selectNode('sensor')">
-        <div class="pnode-icon">✈</div>
-        <div class="pnode-name">Aircraft<br>Sensors</div>
-        <div class="pnode-sub">Raw ECAM data</div>
-      </div>
+      <div class="pnode n-sensor" onclick="selectNode('sensor',this)"><div class="pnode-icon">✈</div><div class="pnode-name">Aircraft<br>Sensors</div><div class="pnode-sub">Raw ECAM data</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">RAW</div></div>
-      <div class="pnode n-arinc" onclick="selectNode('arinc')">
-        <div class="pnode-icon">⬡</div>
-        <div class="pnode-name">ARINC 429<br>Bus Tap</div>
-        <div class="pnode-sub">Data intercept</div>
-      </div>
+      <div class="pnode n-arinc" onclick="selectNode('arinc',this)"><div class="pnode-icon">⬡</div><div class="pnode-name">ARINC 429<br>Bus Tap</div><div class="pnode-sub">Data intercept</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">STREAM</div></div>
-      <div class="pnode n-kalman" onclick="selectNode('kalman')">
-        <div class="pnode-icon">〰</div>
-        <div class="pnode-name">Kalman<br>Filter</div>
-        <div class="pnode-sub">Stage 01</div>
-      </div>
+      <div class="pnode n-kalman" onclick="selectNode('kalman',this)"><div class="pnode-icon">〰</div><div class="pnode-name">Kalman<br>Filter</div><div class="pnode-sub">Stage 01</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">SMOOTH</div></div>
-      <div class="pnode n-lstm" onclick="selectNode('lstm')">
-        <div class="pnode-icon">◎</div>
-        <div class="pnode-name">LSTM<br>Network</div>
-        <div class="pnode-sub">Stage 02</div>
-      </div>
+      <div class="pnode n-lstm" onclick="selectNode('lstm',this)"><div class="pnode-icon">◎</div><div class="pnode-name">LSTM<br>Network</div><div class="pnode-sub">Stage 02</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">VALIDATE</div></div>
-      <div class="pnode n-iso" onclick="selectNode('iso')">
-        <div class="pnode-icon">◈</div>
-        <div class="pnode-name">Isolation<br>Forest</div>
-        <div class="pnode-sub">Stage 03</div>
-      </div>
+      <div class="pnode n-iso" onclick="selectNode('iso',this)"><div class="pnode-icon">◈</div><div class="pnode-name">Isolation<br>Forest</div><div class="pnode-sub">Stage 03</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">SCORE</div></div>
-      <div class="pnode n-rf" onclick="selectNode('rf')">
-        <div class="pnode-icon">⊞</div>
-        <div class="pnode-name">Random<br>Forest</div>
-        <div class="pnode-sub">Stage 04</div>
-      </div>
+      <div class="pnode n-rf" onclick="selectNode('rf',this)"><div class="pnode-icon">⊞</div><div class="pnode-name">Random<br>Forest</div><div class="pnode-sub">Stage 04</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">DECIDE</div></div>
-      <div class="pnode n-edge" onclick="selectNode('edge')">
-        <div class="pnode-icon">▣</div>
-        <div class="pnode-name">Edge<br>Processor</div>
-        <div class="pnode-sub">Onboard compute</div>
-      </div>
+      <div class="pnode n-edge" onclick="selectNode('edge',this)"><div class="pnode-icon">▣</div><div class="pnode-name">Edge<br>Processor</div><div class="pnode-sub">Onboard compute</div></div>
       <div class="p-arrow"><div class="p-arrow-line"></div><div class="p-arrow-tag">CLEAN</div></div>
-      <div class="pnode n-ecam" onclick="selectNode('ecam')">
-        <div class="pnode-icon">◉</div>
-        <div class="pnode-name">ECAM<br>Display</div>
-        <div class="pnode-sub">Validated alerts</div>
-      </div>
+      <div class="pnode n-ecam" onclick="selectNode('ecam',this)"><div class="pnode-icon">◉</div><div class="pnode-name">ECAM<br>Display</div><div class="pnode-sub">Validated alerts</div></div>
     </div>
-
     <div class="node-detail" id="node-detail"></div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ SIMULATION ═══════ -->
+<!-- ═══ SIMULATION ═══ -->
 <div class="section" id="section-simulation">
   <div class="section-header">
     <div class="section-eyebrow">Interactive Demo</div>
     <h1 class="section-title">Live Sensor <span class="accent">Simulation</span></h1>
     <p class="section-desc">Simulate sensor data streams with controllable noise and fault injection. Watch the AI pipeline filter out false readings in real time.</p>
   </div>
-
-  <div class="phase-row" id="phase-row">
-    <div style="font-family:var(--font-mono);font-size:9px;color:var(--muted);display:flex;align-items:center;margin-right:4px;letter-spacing:1px;">FLIGHT PHASE:</div>
-    <button class="phase-btn active" onclick="setPhase('TAXI')">TAXI</button>
-    <button class="phase-btn" onclick="setPhase('TAKEOFF')">TAKEOFF</button>
-    <button class="phase-btn" onclick="setPhase('CLIMB')">CLIMB</button>
-    <button class="phase-btn" onclick="setPhase('CRUISE')">CRUISE</button>
-    <button class="phase-btn" onclick="setPhase('DESCENT')">DESCENT</button>
-    <button class="phase-btn" onclick="setPhase('LANDING')">LANDING</button>
+  <div class="phase-row">
+    <div style="font-family:var(--font-mono);font-size:8px;color:var(--muted);display:flex;align-items:center;letter-spacing:1px;">PHASE:</div>
+    <button class="phase-btn active" onclick="setPhase('TAXI',this)">TAXI</button>
+    <button class="phase-btn" onclick="setPhase('TAKEOFF',this)">TAKEOFF</button>
+    <button class="phase-btn" onclick="setPhase('CLIMB',this)">CLIMB</button>
+    <button class="phase-btn" onclick="setPhase('CRUISE',this)">CRUISE</button>
+    <button class="phase-btn" onclick="setPhase('DESCENT',this)">DESCENT</button>
+    <button class="phase-btn" onclick="setPhase('LANDING',this)">LANDING</button>
   </div>
-
   <div class="sim-grid">
     <div class="sim-main">
       <div class="sim-chart-box">
         <div class="sim-chart-header">
-          <div class="sim-chart-title">ENGINE TEMPERATURE SENSOR (°C)</div>
+          <div class="sim-chart-title">ENGINE TEMPERATURE (°C)</div>
           <div class="sim-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#ff4444"></div>Raw Sensor</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#00aaff"></div>Kalman Smoothed</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff4444"></div>Raw</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00aaff"></div>Kalman</div>
             <div class="legend-item"><div class="legend-dot" style="background:#00ff88"></div>AI Validated</div>
           </div>
         </div>
-        <canvas id="chart1" height="140"></canvas>
+        <canvas id="chart1" height="150"></canvas>
       </div>
-
       <div class="sim-chart-box">
         <div class="sim-chart-header">
-          <div class="sim-chart-title">HYDRAULIC PRESSURE SENSOR (PSI)</div>
+          <div class="sim-chart-title">HYDRAULIC PRESSURE (PSI)</div>
           <div class="sim-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#ff4444"></div>Raw Sensor</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#00aaff"></div>Kalman Smoothed</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#ff4444"></div>Raw</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#00aaff"></div>Kalman</div>
             <div class="legend-item"><div class="legend-dot" style="background:#00ff88"></div>AI Validated</div>
           </div>
         </div>
-        <canvas id="chart2" height="140"></canvas>
+        <canvas id="chart2" height="150"></canvas>
       </div>
-
       <div class="sim-controls">
         <div class="controls-title">Simulation Parameters</div>
         <div class="ctrl-row">
@@ -714,36 +168,28 @@ canvas{width:100%;display:block;}
           <button class="btn btn-success" onclick="resetSim()">↺ RESET</button>
         </div>
       </div>
-
       <div class="alerts-box">
         <div class="alerts-header">
           <div class="alerts-title">Alert Feed</div>
-          <div>
-            <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);margin-right:12px;">SUPPRESSED: <span id="suppressCount" style="color:var(--green)">0</span></span>
-            <span style="font-family:var(--font-mono);font-size:9px;color:var(--muted);">PASSED: <span id="passCount" style="color:var(--amber)">0</span></span>
+          <div style="display:flex;gap:12px;">
+            <span style="font-family:var(--font-mono);font-size:8px;color:var(--muted);">SUPPRESSED: <span id="suppressCount" style="color:var(--green)">0</span></span>
+            <span style="font-family:var(--font-mono);font-size:8px;color:var(--muted);">PASSED: <span id="passCount" style="color:var(--amber)">0</span></span>
           </div>
         </div>
         <div class="alert-feed" id="alertFeed">
-          <div class="alert-item">
-            <div class="alert-time">00:00</div>
-            <div class="alert-status ok">SYS</div>
-            <div class="alert-msg">System ready. Start simulation to begin data stream.</div>
-          </div>
+          <div class="alert-item"><div class="alert-time">00:00</div><div class="alert-status ok">SYS</div><div class="alert-msg">System ready. Start simulation to begin data stream.</div></div>
         </div>
       </div>
     </div>
-
     <div class="sim-sidebar">
       <div class="metrics-box">
         <div class="metrics-title">Live Metrics</div>
         <div class="metric-row"><div class="mr-label">Pipeline Status</div><div class="mr-val good" id="pipeStatus">IDLE</div></div>
         <div class="metric-row"><div class="mr-label">Flight Phase</div><div class="mr-val neutral" id="phaseDisplay">TAXI</div></div>
         <div class="metric-row"><div class="mr-label">Readings/sec</div><div class="mr-val neutral" id="rpsDisplay">—</div></div>
-        <div class="metric-row"><div class="mr-label">False Positives</div><div class="mr-val" id="fpDisplay" style="color:var(--muted)">—</div></div>
         <div class="metric-row"><div class="mr-label">Filter Rate</div><div class="mr-val" id="filterRate" style="color:var(--muted)">—</div></div>
         <div class="metric-row"><div class="mr-label">Latency (est)</div><div class="mr-val good" id="latDisplay">—</div></div>
       </div>
-
       <div class="pipeline-status">
         <div class="ps-title">Pipeline Stages</div>
         <div class="ps-stage"><div class="ps-dot idle" id="dot-kalman"></div><div class="ps-name">Kalman Filter</div><div class="ps-stat" id="stat-kalman">—</div></div>
@@ -756,94 +202,43 @@ canvas{width:100%;display:block;}
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ TESTING ═══════ -->
+<!-- ═══ TESTING ═══ -->
 <div class="section" id="section-testing">
   <div class="section-header">
     <div class="section-eyebrow">Round 2 Plan</div>
     <h1 class="section-title">Testing & <span class="accent">Prototyping</span> Plan</h1>
     <p class="section-desc">If the team advances to Round 2, the following structured testing and prototyping roadmap will be executed across three phases.</p>
   </div>
-
-  <div class="test-grid" style="margin-bottom:24px;">
+  <div class="test-grid" style="margin-bottom:16px;">
     <div class="test-card">
       <div class="test-card-title" style="color:var(--amber)">Phase 1 — Data & Simulation</div>
       <div class="test-card-desc">Collect or generate realistic ECAM sensor datasets. Introduce controlled synthetic faults to build a labeled test corpus.</div>
-      <div class="test-scenario" id="ts1" onclick="runTest('ts1')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Generate synthetic flight sensor dataset</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="test-scenario" id="ts2" onclick="runTest('ts2')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Inject synthetic noise per flight phase</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="test-scenario" id="ts3" onclick="runTest('ts3')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Label fault vs. clean readings (ground truth)</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-label"><span>PHASE 1 PROGRESS</span><span id="p1pct">0%</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="p1bar" style="width:0%"></div></div>
-      </div>
+      <div class="test-scenario" id="ts1" onclick="runTest('ts1')"><div class="ts-icon">◦</div><div class="ts-name">Generate synthetic flight sensor dataset</div><div class="ts-badge">RUN</div></div>
+      <div class="test-scenario" id="ts2" onclick="runTest('ts2')"><div class="ts-icon">◦</div><div class="ts-name">Inject synthetic noise per flight phase</div><div class="ts-badge">RUN</div></div>
+      <div class="test-scenario" id="ts3" onclick="runTest('ts3')"><div class="ts-icon">◦</div><div class="ts-name">Label fault vs. clean readings (ground truth)</div><div class="ts-badge">RUN</div></div>
+      <div class="progress-bar-wrap"><div class="progress-label"><span>PHASE 1 PROGRESS</span><span id="p1pct">0%</span></div><div class="progress-bar"><div class="progress-fill" id="p1bar" style="width:0%"></div></div></div>
     </div>
-
     <div class="test-card">
       <div class="test-card-title" style="color:var(--cyan)">Phase 2 — Model Training & Validation</div>
       <div class="test-card-desc">Train all AI models on the generated dataset, then evaluate performance using standard classification metrics.</div>
-      <div class="test-scenario" id="ts4" onclick="runTest('ts4')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Train LSTM on normal flight sequences</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="test-scenario" id="ts5" onclick="runTest('ts5')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Train Isolation Forest anomaly detector</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="test-scenario" id="ts6" onclick="runTest('ts6')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Evaluate F1-score, precision, recall</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-label"><span>PHASE 2 PROGRESS</span><span id="p2pct">0%</span></div>
-        <div class="progress-bar"><div class="progress-fill green" id="p2bar" style="width:0%"></div></div>
-      </div>
+      <div class="test-scenario" id="ts4" onclick="runTest('ts4')"><div class="ts-icon">◦</div><div class="ts-name">Train LSTM on normal flight sequences</div><div class="ts-badge">RUN</div></div>
+      <div class="test-scenario" id="ts5" onclick="runTest('ts5')"><div class="ts-icon">◦</div><div class="ts-name">Train Isolation Forest anomaly detector</div><div class="ts-badge">RUN</div></div>
+      <div class="test-scenario" id="ts6" onclick="runTest('ts6')"><div class="ts-icon">◦</div><div class="ts-name">Evaluate F1-score, precision, recall</div><div class="ts-badge">RUN</div></div>
+      <div class="progress-bar-wrap"><div class="progress-label"><span>PHASE 2 PROGRESS</span><span id="p2pct">0%</span></div><div class="progress-bar"><div class="progress-fill green" id="p2bar" style="width:0%"></div></div></div>
     </div>
-
     <div class="test-card">
       <div class="test-card-title" style="color:var(--green)">Phase 3 — Prototype Deployment</div>
       <div class="test-card-desc">Deploy the pipeline on an edge processor, simulate the ARINC 429 bus, and verify real-time latency requirements.</div>
-      <div class="test-scenario" id="ts7" onclick="runTest('ts7')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Deploy on edge device (Raspberry Pi / Jetson)</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="test-scenario" id="ts8" onclick="runTest('ts8')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Simulate ARINC 429 bus intercept/re-inject</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="test-scenario" id="ts9" onclick="runTest('ts9')">
-        <div class="ts-icon">◦</div>
-        <div class="ts-name">Verify end-to-end latency &lt;5ms</div>
-        <div class="ts-badge">RUN</div>
-      </div>
-      <div class="progress-bar-wrap">
-        <div class="progress-label"><span>PHASE 3 PROGRESS</span><span id="p3pct">0%</span></div>
-        <div class="progress-bar"><div class="progress-fill" id="p3bar" style="width:0%"></div></div>
-      </div>
+      <div class="test-scenario" id="ts7" onclick="runTest('ts7')"><div class="ts-icon">◦</div><div class="ts-name">Deploy on edge device (Raspberry Pi / Jetson)</div><div class="ts-badge">RUN</div></div>
+      <div class="test-scenario" id="ts8" onclick="runTest('ts8')"><div class="ts-icon">◦</div><div class="ts-name">Simulate ARINC 429 bus intercept/re-inject</div><div class="ts-badge">RUN</div></div>
+      <div class="test-scenario" id="ts9" onclick="runTest('ts9')"><div class="ts-icon">◦</div><div class="ts-name">Verify end-to-end latency &lt;5ms</div><div class="ts-badge">RUN</div></div>
+      <div class="progress-bar-wrap"><div class="progress-label"><span>PHASE 3 PROGRESS</span><span id="p3pct">0%</span></div><div class="progress-bar"><div class="progress-fill" id="p3bar" style="width:0%"></div></div></div>
     </div>
-
     <div class="test-card">
       <div class="test-card-title" style="color:var(--blue)">Expected Metrics</div>
       <div class="test-card-desc">Target performance benchmarks for the validated AI filtering system.</div>
       <table class="metrics-table">
-        <thead>
-          <tr><th>Metric</th><th>Target</th><th>Priority</th></tr>
-        </thead>
+        <thead><tr><th>Metric</th><th>Target</th><th>Priority</th></tr></thead>
         <tbody>
           <tr><td>False Positive Rate</td><td class="good">&lt; 5%</td><td class="warn">CRITICAL</td></tr>
           <tr><td>True Fault Detection</td><td class="good">&gt; 95%</td><td class="warn">CRITICAL</td></tr>
@@ -857,18 +252,16 @@ canvas{width:100%;display:block;}
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════ TECH ═══════ -->
+<!-- ═══ TECH ═══ -->
 <div class="section" id="section-tech">
   <div class="section-header">
     <div class="section-eyebrow">Digital Technologies</div>
     <h1 class="section-title">Technology <span class="accent">Stack</span></h1>
     <p class="section-desc">Six verified technologies form the complete system. Click any card for technical depth.</p>
   </div>
-
   <div class="tech-grid">
     <div class="tech-card" onclick="toggleTech(this)">
-      <div class="tc-num">01 / STAGE 1</div>
-      <div class="tc-name">Kalman Filter</div>
+      <div class="tc-num">01 / STAGE 1</div><div class="tc-name">Kalman Filter</div>
       <div class="tc-role">Signal Smoothing · Preprocessing</div>
       <div class="tc-desc">A classical signal processing algorithm that estimates the true state of a sensor reading by combining the current noisy measurement with predictions from a physical motion model.</div>
       <div class="tc-expand">
@@ -879,17 +272,11 @@ canvas{width:100%;display:block;}
           <li>Computationally lightweight — essential for onboard edge deployment</li>
           <li>Provides a stable input signal that dramatically improves LSTM accuracy</li>
         </ul>
-        <div style="margin-top:10px;">
-          <span class="tag tag-blue">Deterministic</span>
-          <span class="tag tag-green">Lightweight</span>
-          <span class="tag tag-blue">Real-time</span>
-        </div>
+        <div style="margin-top:8px;"><span class="tag tag-blue">Deterministic</span><span class="tag tag-green">Lightweight</span><span class="tag tag-blue">Real-time</span></div>
       </div>
     </div>
-
     <div class="tech-card" onclick="toggleTech(this)">
-      <div class="tc-num">02 / STAGE 2</div>
-      <div class="tc-name">LSTM Neural Network</div>
+      <div class="tc-num">02 / STAGE 2</div><div class="tc-name">LSTM Neural Network</div>
       <div class="tc-role">Temporal Anomaly Detection · ML</div>
       <div class="tc-desc">Long Short-Term Memory networks learn the expected time-series behavior of each sensor across different flight phases. Readings that deviate from learned temporal patterns are flagged as anomalies.</div>
       <div class="tc-expand">
@@ -900,17 +287,11 @@ canvas{width:100%;display:block;}
           <li>Handles multivariate sensor fusion — cross-validates related sensors</li>
           <li>Model retrained periodically with new in-service data</li>
         </ul>
-        <div style="margin-top:10px;">
-          <span class="tag tag-blue">Deep Learning</span>
-          <span class="tag tag-amber">Time-Series</span>
-          <span class="tag tag-blue">Supervised</span>
-        </div>
+        <div style="margin-top:8px;"><span class="tag tag-blue">Deep Learning</span><span class="tag tag-amber">Time-Series</span><span class="tag tag-blue">Supervised</span></div>
       </div>
     </div>
-
     <div class="tech-card" onclick="toggleTech(this)">
-      <div class="tc-num">03 / STAGE 3a</div>
-      <div class="tc-name">Isolation Forest</div>
+      <div class="tc-num">03 / STAGE 3a</div><div class="tc-name">Isolation Forest</div>
       <div class="tc-role">Statistical Outlier Detection · ML</div>
       <div class="tc-desc">An ensemble-based anomaly detection algorithm that isolates outlier sensor values by randomly partitioning the feature space. Anomalies are isolated faster because they differ from normal distribution.</div>
       <div class="tc-expand">
@@ -921,17 +302,11 @@ canvas{width:100%;display:block;}
           <li>Complements LSTM by catching sudden spike outliers</li>
           <li>Works in parallel with Autoencoder for ensemble confidence</li>
         </ul>
-        <div style="margin-top:10px;">
-          <span class="tag tag-green">Unsupervised</span>
-          <span class="tag tag-blue">Ensemble</span>
-          <span class="tag tag-green">No Labels Needed</span>
-        </div>
+        <div style="margin-top:8px;"><span class="tag tag-green">Unsupervised</span><span class="tag tag-blue">Ensemble</span><span class="tag tag-green">No Labels Needed</span></div>
       </div>
     </div>
-
     <div class="tech-card" onclick="toggleTech(this)">
-      <div class="tc-num">03 / STAGE 3b</div>
-      <div class="tc-name">Autoencoder</div>
+      <div class="tc-num">03 / STAGE 3b</div><div class="tc-name">Autoencoder</div>
       <div class="tc-role">Reconstruction-Based Detection · ML</div>
       <div class="tc-desc">A neural network trained to reconstruct normal sensor readings. Faulty readings produce high reconstruction error — indicating the input pattern was outside the normal distribution seen during training.</div>
       <div class="tc-expand">
@@ -942,17 +317,11 @@ canvas{width:100%;display:block;}
           <li>Encoder output used as compressed feature vector for downstream stages</li>
           <li>Combined with Isolation Forest for ensemble confidence scoring</li>
         </ul>
-        <div style="margin-top:10px;">
-          <span class="tag tag-green">Unsupervised</span>
-          <span class="tag tag-blue">Neural Network</span>
-          <span class="tag tag-amber">Drift Detection</span>
-        </div>
+        <div style="margin-top:8px;"><span class="tag tag-green">Unsupervised</span><span class="tag tag-blue">Neural Network</span><span class="tag tag-amber">Drift Detection</span></div>
       </div>
     </div>
-
     <div class="tech-card" onclick="toggleTech(this)">
-      <div class="tc-num">04 / STAGE 4</div>
-      <div class="tc-name">Random Forest Classifier</div>
+      <div class="tc-num">04 / STAGE 4</div><div class="tc-name">Random Forest Classifier</div>
       <div class="tc-role">Flight Phase Context · Decision</div>
       <div class="tc-desc">A multi-class classifier that identifies the current flight phase from combined sensor states. This allows the pipeline to apply correct phase-specific thresholds for each sensor, rather than global fixed limits.</div>
       <div class="tc-expand">
@@ -963,17 +332,11 @@ canvas{width:100%;display:block;}
           <li>Runs as final gate: reading must pass phase-specific threshold to proceed</li>
           <li>Ensemble of 100+ decision trees for robust classification</li>
         </ul>
-        <div style="margin-top:10px;">
-          <span class="tag tag-blue">Supervised</span>
-          <span class="tag tag-green">Interpretable</span>
-          <span class="tag tag-amber">Multi-class</span>
-        </div>
+        <div style="margin-top:8px;"><span class="tag tag-blue">Supervised</span><span class="tag tag-green">Interpretable</span><span class="tag tag-amber">Multi-class</span></div>
       </div>
     </div>
-
     <div class="tech-card" onclick="toggleTech(this)">
-      <div class="tc-num">05 / BUS LAYER</div>
-      <div class="tc-name">ARINC 429</div>
+      <div class="tc-num">05 / BUS LAYER</div><div class="tc-name">ARINC 429</div>
       <div class="tc-role">Avionics Data Bus · Integration</div>
       <div class="tc-desc">The verified standard avionics communication protocol used in Airbus A320, A330, and A340 aircraft. All sensor data from ECAM-monitored systems is transmitted via this unidirectional, point-to-point bus.</div>
       <div class="tc-expand">
@@ -984,380 +347,12 @@ canvas{width:100%;display:block;}
           <li>Pipeline taps the bus passively, processes, then re-injects via a parallel bus</li>
           <li>Standard for A310, A320, A330, A340 — directly applicable to this problem</li>
         </ul>
-        <div style="margin-top:10px;">
-          <span class="tag tag-amber">Verified Standard</span>
-          <span class="tag tag-blue">Airbus Native</span>
-          <span class="tag tag-green">Hardware Layer</span>
-        </div>
+        <div style="margin-top:8px;"><span class="tag tag-amber">Verified Standard</span><span class="tag tag-blue">Airbus Native</span><span class="tag tag-green">Hardware Layer</span></div>
       </div>
     </div>
   </div>
 </div>
 
-<script>
-// ── NAVIGATION ──
-function showSection(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('section-'+id).classList.add('active');
-  event.target.classList.add('active');
-  if(id==='simulation') initCharts();
-}
-
-// ── PIPELINE NODE DATA ──
-const nodeData = {
-  sensor:{
-    title:'Aircraft Sensors (Raw Data Sources)',
-    col1:{h:'What It Is',body:'The physical sensors distributed throughout the aircraft. These include EGT (exhaust gas temperature) probes, hydraulic pressure transducers, fuel flow meters, N1/N2 engine speed sensors, and more. They continuously output readings that feed into the ECAM processing chain.'},
-    col2:{h:'The Problem',list:['Sensors can produce inaccurate readings due to physical wear, EMI interference, or calibration drift','Readings may be technically within hardware limits but inconsistent with current aircraft state','These erroneous values are indistinguishable from genuine faults at the raw data level','ECAM has no native layer to validate contextual plausibility of readings']},
-    col3:{h:'Sensor Types Monitored',list:['EGT — Exhaust Gas Temperature (°C)','N1/N2 — Engine fan/core speed (%RPM)','FOHE — Fuel Oil Heat Exchanger pressure','Hydraulic pressure (Green/Blue/Yellow circuits)','Cabin differential pressure (PSI)','FADEC — Full Authority Digital Engine Control outputs']}
-  },
-  arinc:{
-    title:'ARINC 429 Bus — Data Intercept Layer',
-    col1:{h:'What ARINC 429 Is',body:'The standard avionics communication protocol used on Airbus A320, A330, and A340 aircraft. It is a unidirectional, point-to-point serial data bus where one transmitter communicates with up to 20 receivers via a twisted wire pair. Each data word is 32 bits, transmitted at 12.5 or 100 kbit/s.'},
-    col2:{h:'How It Is Used Here',list:['The AI pipeline passively taps the ARINC 429 bus between sensors and the SDACs (System Data Acquisition Concentrators)','Intercepted data words are decoded and passed to the AI filtering stages','After processing, validated data is re-injected via a parallel ARINC 429 bus output','Rejected readings are logged to a maintenance data store for post-flight review','The SDAC and FWC receive only the filtered, validated stream']},
-    col3:{h:'Technical Specs',list:['32-bit word format: Label (8b) + SDI (2b) + Data (19b) + SSM (2b) + Parity (1b)','Sign/Status Matrix field indicates data validity natively','Low speed (12.5 kbit/s) for most sensor data — low latency overhead','Unidirectional design makes passive tapping non-disruptive to original bus','Used on: A310, A320, A330, A340, B737, B747, B757, B767, MD-11']}
-  },
-  kalman:{
-    title:'Stage 01 — Kalman Filter (Signal Smoothing)',
-    col1:{h:'What It Does',body:'The Kalman filter is the first processing stage. It takes the raw, noisy sensor readings from the ARINC 429 tap and produces a smoothed, statistically optimal estimate of the true sensor value. It combines the current reading with predictions from a physical model of how the sensor should behave.'},
-    col2:{h:'Why It Is Stage 1',list:['Noise must be removed before ML models can accurately assess anomalies','Kalman filtering is deterministic and extremely lightweight — no GPU needed','It operates in real time with no buffering, adding near-zero latency','Provides stable input that dramatically improves LSTM and Isolation Forest accuracy','If Kalman-smoothed value diverges sharply from raw, it is itself an anomaly signal']},
-    col3:{h:'Technical Notes',list:['State vector includes sensor value + rate of change','Measurement noise covariance tuned per sensor type','Process noise model derived from known aircraft dynamics','Extended Kalman Filter (EKF) variant used for non-linear sensor models (e.g., EGT)','Runs independently per sensor channel — fully parallelizable on edge processor']}
-  },
-  lstm:{
-    title:'Stage 02 — LSTM Neural Network (Temporal Validation)',
-    col1:{h:'What It Does',body:'The LSTM (Long Short-Term Memory) network analyzes sequences of sensor readings over time. It has been trained on historical normal flight data and learns the expected temporal patterns for each sensor in each flight phase. When a reading does not fit the expected pattern, it receives a high anomaly score.'},
-    col2:{h:'Why LSTM Specifically',list:['Sensors follow time-dependent patterns — simple threshold checks miss gradual drift','LSTMs have memory cells that retain context across hundreds of time steps','Can detect anomalies that only become visible in temporal context (e.g., temperature rising too fast)','Trained per flight phase so thresholds adapt to operational context','Outputs a continuous anomaly probability, not a binary flag — allows tunable sensitivity']},
-    col3:{h:'Training Details',list:['Input: sliding window of 50 timesteps per sensor channel','Output: anomaly probability score in [0, 1]','Architecture: 2 LSTM layers (64 units each) + dense output layer','Training data: simulated + historical normal flight sequences','Loss: Binary cross-entropy on labeled fault/no-fault windows']}
-  },
-  iso:{
-    title:'Stage 03 — Isolation Forest & Autoencoder (Outlier Scoring)',
-    col1:{h:'What They Do',body:'Two complementary unsupervised anomaly detectors run in parallel. The Isolation Forest partitions the sensor feature space randomly — anomalous readings are isolated in fewer steps. The Autoencoder reconstructs normal readings and flags inputs with high reconstruction error as anomalies. Their scores are combined into a single confidence value.'},
-    col2:{h:'Why Both Together',list:['Isolation Forest excels at sudden spike outliers (fast but shallow)','Autoencoder excels at detecting slow sensor drift and gradual degradation','Ensemble of both scores reduces both false positives and false negatives','Neither requires labeled fault data — trained on normal data only','Complementary failure modes: one compensates for the other\'s blind spots']},
-    col3:{h:'Technical Notes',list:['Isolation Forest: 200 trees, contamination parameter = 0.05','Autoencoder: encoder (32→16→8) + decoder (8→16→32), trained on MSE','Ensemble score: 0.4 × IsoForest + 0.6 × Autoencoder reconstruction error','Threshold for rejection tuned per flight phase via validation set','Scores logged alongside readings for explainability audit trail']}
-  },
-  rf:{
-    title:'Stage 04 — Random Forest Classifier (Phase-Aware Gating)',
-    col1:{h:'What It Does',body:'The final AI stage classifies the current flight phase from the combined multi-sensor state. This ensures each sensor reading is evaluated against the correct, context-appropriate thresholds rather than a single global limit. A reading that is normal during cruise may be anomalous during takeoff.'},
-    col2:{h:'Why Flight Phase Matters',list:['EGT limits differ significantly between ground idle and full takeoff thrust','Hydraulic pressure normal ranges depend on flight control surface loads','Cabin pressure differential only becomes relevant above ~8,000 ft','N1/N2 speed profiles are fundamentally different in each phase','Without phase context, a correctly functioning engine during takeoff would trigger false alerts']},
-    col3:{h:'Classification Details',list:['Classes: Taxi / Takeoff / Climb / Cruise / Descent / Landing','Features: airspeed, altitude, N1, N2, thrust lever angle, gear status','100-tree ensemble, max depth 12, trained on full flight cycle data','Prediction confidence threshold: >0.85 required to apply phase thresholds','Outputs phase label + confidence to all upstream scoring stages']}
-  },
-  edge:{
-    title:'Onboard Edge Processor — Real-Time Deployment',
-    col1:{h:'What It Is',body:'All AI pipeline stages run on a dedicated onboard edge computing unit. This ensures the filtering happens in real time — before sensor data reaches the ECAM SDACs and FWCs. The processor handles data decoding, all four AI stages, and re-injection onto the validated ARINC 429 bus output.'},
-    col2:{h:'Why Onboard Edge',list:['Cloud or ground-based processing would introduce unacceptable latency','End-to-end pipeline must complete within one ARINC 429 update cycle (~10ms)','Onboard processing eliminates connectivity dependency','Dedicated processor ensures ECAM pipeline is not affected by other avionics load','Prototype target: NVIDIA Jetson Nano or ARM Cortex-A72 (Raspberry Pi CM4)']},
-    col3:{h:'Resource Estimates (Prototype)',list:['Kalman Filter: < 0.1ms CPU per channel','LSTM inference (TensorRT optimized): ~1.5ms','Isolation Forest + Autoencoder: ~1.2ms','Random Forest: ~0.3ms','Total estimated latency: 3–5ms per reading cycle','Target CPU utilization: < 40% on ARM Cortex-A72 @ 1.5GHz']}
-  },
-  ecam:{
-    title:'ECAM Display — Validated Alert Output',
-    col1:{h:'What ECAM Receives',body:'After the full pipeline, only sensor readings that passed all four validation stages are re-injected onto the ARINC 429 bus and forwarded to the ECAM SDACs and FWCs. The ECAM operates exactly as it normally would — it is unaware of the filtering layer upstream. Its alert logic remains unchanged and uncertified behavior is preserved.'},
-    col2:{h:'Expected Outcomes',list:['Significant reduction in nuisance warnings reaching pilots','Pilot alarm fatigue reduced — real alerts receive full attention','Rejected readings stored in maintenance log for ground crew review','Possible faults revealed in rejection logs before they become actual failures','No modification to certified ECAM firmware or display logic required']},
-    col3:{h:'ECAM System Context',list:['ECAM uses two SDACs (System Data Acquisition Concentrators)','Two FWCs (Flight Warning Computers) generate the alert logic','Three DMCs (Display Management Computers) drive the cockpit screens','E/WD (Engine Warning Display) and SD (System Display) are pilot-facing outputs','Alert levels: Red Warning (immediate action) / Amber Caution / Advisory']}
-  }
-};
-
-function selectNode(id){
-  document.querySelectorAll('.pnode').forEach(n=>n.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-  const d=nodeData[id];
-  const detail=document.getElementById('node-detail');
-  detail.innerHTML=`
-    <div class="detail-section">
-      <div class="detail-heading">${d.col1.h}</div>
-      ${d.col1.body?`<div class="detail-body">${d.col1.body}</div>`:''}
-      ${d.col1.list?`<ul class="detail-list">${d.col1.list.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
-    </div>
-    <div class="detail-section">
-      <div class="detail-heading">${d.col2.h}</div>
-      ${d.col2.body?`<div class="detail-body">${d.col2.body}</div>`:''}
-      ${d.col2.list?`<ul class="detail-list">${d.col2.list.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
-    </div>
-    <div class="detail-section">
-      <div class="detail-heading">${d.col3.h}</div>
-      ${d.col3.body?`<div class="detail-body">${d.col3.body}</div>`:''}
-      ${d.col3.list?`<ul class="detail-list">${d.col3.list.map(i=>`<li>${i}</li>`).join('')}</ul>`:''}
-    </div>
-  `;
-  detail.classList.add('open');
-}
-
-// ── SIMULATION ──
-let simInterval=null, simRunning=false;
-let data1={raw:[],kalman:[],ai:[]};
-let data2={raw:[],kalman:[],ai:[]};
-let params={noise:20,fault:10,sens:75};
-let currentPhase='TAXI';
-let suppressCount=0,passCount=0,totalReadings=0;
-let simTime=0;
-const MAX_POINTS=80;
-
-const phaseBaselines={
-  TAXI:{t1:180,t2:180,h1:3000,h2:3000},
-  TAKEOFF:{t1:820,t2:800,h1:3000,h2:3000},
-  CLIMB:{t1:720,t2:700,h1:2800,h2:2800},
-  CRUISE:{t1:650,t2:640,h1:3000,h2:3000},
-  DESCENT:{t1:580,t2:560,h1:2900,h2:2900},
-  LANDING:{t1:480,t2:460,h1:3000,h2:3000}
-};
-
-function setPhase(p){
-  currentPhase=p;
-  document.querySelectorAll('.phase-btn').forEach(b=>{
-    b.classList.toggle('active',b.textContent===p);
-  });
-  document.getElementById('phaseDisplay').textContent=p;
-}
-
-function updateParam(k,v){
-  params[k]=parseInt(v);
-  document.getElementById(k+'Val').textContent=v+'%';
-}
-
-function noise(scale){return (Math.random()-0.5)*2*scale;}
-
-function kalmanFilter(prev,raw,q=0.01,r=0.1){
-  let p=0.1;
-  let k=p/(p+r);
-  let est=prev+k*(raw-prev);
-  return est;
-}
-
-let k1=null,k2=null;
-
-function initCharts(){
-  if(document.getElementById('chart1').dataset.init) return;
-  document.getElementById('chart1').dataset.init='1';
-  drawChart('chart1',data1,550,740,'°C');
-  drawChart('chart2',data2,2800,3200,'PSI');
-}
-
-function drawChart(id,dataset,yMin,yMax,unit){
-  const canvas=document.getElementById(id);
-  if(!canvas)return;
-  const W=canvas.offsetWidth||700;
-  const H=canvas.height||140;
-  canvas.width=W;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-
-  // bg
-  ctx.fillStyle='rgba(0,0,0,0.3)';
-  ctx.fillRect(0,0,W,H);
-
-  // grid
-  ctx.strokeStyle='rgba(0,170,255,0.06)';
-  ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){
-    const y=H*i/4;
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
-    const val=yMax-(yMax-yMin)*i/4;
-    ctx.fillStyle='rgba(221,238,255,0.25)';
-    ctx.font='9px IBM Plex Mono';
-    ctx.fillText(Math.round(val)+unit,4,y-3);
-  }
-
-  const drawLine=(data,color,alpha=1)=>{
-    if(data.length<2)return;
-    ctx.beginPath();
-    ctx.strokeStyle=color;
-    ctx.globalAlpha=alpha;
-    ctx.lineWidth=1.5;
-    data.forEach((v,i)=>{
-      const x=W*(i/(MAX_POINTS-1));
-      const y=H-(H*(v-yMin)/(yMax-yMin));
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-    ctx.globalAlpha=1;
-  };
-
-  drawLine(dataset.raw,'#ff4444',0.5);
-  drawLine(dataset.kalman,'#00aaff',0.8);
-  drawLine(dataset.ai,'#00ff88',1);
-}
-
-function addAlert(type,msg){
-  const feed=document.getElementById('alertFeed');
-  const mins=String(Math.floor(simTime/60)).padStart(2,'0');
-  const secs=String(simTime%60).padStart(2,'0');
-  const item=document.createElement('div');
-  item.className='alert-item';
-  item.innerHTML=`<div class="alert-time">${mins}:${secs}</div><div class="alert-status ${type}">${type.toUpperCase()}</div><div class="alert-msg">${msg}</div>`;
-  feed.insertBefore(item,feed.firstChild);
-  if(feed.children.length>30) feed.removeChild(feed.lastChild);
-}
-
-function updatePipelineDots(active){
-  ['kalman','lstm','iso','rf','edge'].forEach(s=>{
-    const dot=document.getElementById('dot-'+s);
-    dot.className='ps-dot '+(active?'active':'idle');
-  });
-}
-
-function startSim(){
-  if(simRunning){
-    clearInterval(simInterval);
-    simRunning=false;
-    document.getElementById('startBtn').textContent='▶ START';
-    document.getElementById('pipeStatus').textContent='IDLE';
-    document.getElementById('pipeStatus').className='mr-val good';
-    updatePipelineDots(false);
-    ['kalman','lstm','iso','rf','edge'].forEach(s=>document.getElementById('stat-'+s).textContent='—');
-    return;
-  }
-  simRunning=true;
-  k1=null;k2=null;
-  document.getElementById('startBtn').textContent='⏸ PAUSE';
-  document.getElementById('pipeStatus').textContent='ACTIVE';
-  updatePipelineDots(true);
-  document.getElementById('latDisplay').textContent='~3.8ms';
-
-  simInterval=setInterval(()=>{
-    simTime++;
-    totalReadings++;
-    const bl=phaseBaselines[currentPhase];
-    const nScale=params.noise*2;
-    const faultChance=params.fault/100;
-    const sens=params.sens/100;
-
-    // Raw readings
-    let r1=bl.t1+noise(nScale);
-    let r2=bl.h1+noise(nScale*0.5);
-
-    // Inject fault occasionally
-    const isFault=Math.random()<faultChance;
-    if(isFault){
-      r1+=noise(nScale*8);
-      r2+=noise(nScale*6);
-    }
-
-    // Kalman
-    if(k1===null){k1=r1;k2=r2;}
-    const sm1=kalmanFilter(k1,r1);
-    const sm2=kalmanFilter(k2,r2);
-    k1=sm1;k2=sm2;
-
-    // AI validated (filter out anomalies based on sensitivity)
-    const anomalyThreshold=(1-sens)*50+10;
-    const dev1=Math.abs(r1-bl.t1);
-    const dev2=Math.abs(r2-bl.h1);
-    const isAnomaly=dev1>anomalyThreshold||dev2>(anomalyThreshold*0.5);
-
-    let v1=isAnomaly?bl.t1+noise(5):sm1;
-    let v2=isAnomaly?bl.h1+noise(3):sm2;
-
-    // Push to arrays
-    const push=(arr,v)=>{arr.push(v);if(arr.length>MAX_POINTS)arr.shift();};
-    push(data1.raw,r1);push(data1.kalman,sm1);push(data1.ai,v1);
-    push(data2.raw,r2);push(data2.kalman,sm2);push(data2.ai,v2);
-
-    // Update counts
-    if(isFault&&isAnomaly){
-      suppressCount++;
-      document.getElementById('suppressCount').textContent=suppressCount;
-      if(Math.random()<0.4) addAlert('filter',`ENG TEMP spike suppressed — ${Math.round(r1)}°C vs expected ${bl.t1}°C`);
-    } else if(!isFault){
-      passCount++;
-      document.getElementById('passCount').textContent=passCount;
-    } else if(isFault&&!isAnomaly){
-      addAlert('warn',`Fault passed filter — ENG TEMP: ${Math.round(r1)}°C (reduce sensitivity)`);
-    }
-
-    // Stage stats
-    const rps=Math.min(totalReadings,10);
-    document.getElementById('rpsDisplay').textContent=rps;
-    document.getElementById('stat-kalman').textContent=`σ=${Math.abs(r1-sm1).toFixed(1)}`;
-    document.getElementById('stat-lstm').textContent=isFault?'ANOMALY':'NORMAL';
-    document.getElementById('stat-iso').textContent=`score=${(Math.random()*0.3+(isFault?0.6:0)).toFixed(2)}`;
-    document.getElementById('stat-rf').textContent=currentPhase;
-    document.getElementById('stat-edge').textContent=`${(3+Math.random()*1.5).toFixed(1)}ms`;
-
-    const fp=totalReadings>0?((suppressCount/Math.max(1,totalReadings))*100).toFixed(1):0;
-    const fr=totalReadings>0?((suppressCount/totalReadings)*100).toFixed(1):0;
-    document.getElementById('fpDisplay').textContent=fp+'%';
-    document.getElementById('fpDisplay').className='mr-val '+(fp<10?'good':'warn');
-    document.getElementById('filterRate').textContent=fr+'%';
-    document.getElementById('filterRate').className='mr-val neutral';
-
-    drawChart('chart1',data1,Math.min(350,bl.t1-150),Math.max(950,bl.t1+200),'°C');
-    drawChart('chart2',data2,2600,Math.max(3400,bl.h1+300),'PSI');
-  },180);
-}
-
-function injectFault(){
-  if(!simRunning){addAlert('warn','Start simulation first');return;}
-  params.fault=Math.min(params.fault+30,90);
-  document.getElementById('faultSlider').value=params.fault;
-  document.getElementById('faultVal').textContent=params.fault+'%';
-  addAlert('warn',`FAULT INJECTION ACTIVE — fault rate elevated to ${params.fault}%`);
-  setTimeout(()=>{
-    params.fault=Math.max(params.fault-30,10);
-    document.getElementById('faultSlider').value=params.fault;
-    document.getElementById('faultVal').textContent=params.fault+'%';
-    addAlert('ok','Fault injection ended — rates normalized');
-  },4000);
-}
-
-function resetSim(){
-  clearInterval(simInterval);
-  simRunning=false;
-  data1={raw:[],kalman:[],ai:[]};
-  data2={raw:[],kalman:[],ai:[]};
-  suppressCount=0;passCount=0;totalReadings=0;simTime=0;
-  k1=null;k2=null;
-  document.getElementById('startBtn').textContent='▶ START';
-  document.getElementById('pipeStatus').textContent='IDLE';
-  document.getElementById('suppressCount').textContent='0';
-  document.getElementById('passCount').textContent='0';
-  document.getElementById('fpDisplay').textContent='—';
-  document.getElementById('filterRate').textContent='—';
-  document.getElementById('rpsDisplay').textContent='—';
-  document.getElementById('latDisplay').textContent='—';
-  document.getElementById('alertFeed').innerHTML='<div class="alert-item"><div class="alert-time">00:00</div><div class="alert-status ok">SYS</div><div class="alert-msg">System reset. Ready to start.</div></div>';
-  updatePipelineDots(false);
-  ['kalman','lstm','iso','rf','edge'].forEach(s=>document.getElementById('stat-'+s).textContent='—');
-  drawChart('chart1',data1,350,950,'°C');
-  drawChart('chart2',data2,2600,3400,'PSI');
-}
-
-// ── TESTING ──
-const testState={};
-function runTest(id){
-  if(testState[id]==='running') return;
-  const el=document.getElementById(id);
-  el.className='test-scenario running';
-  el.querySelector('.ts-icon').textContent='◌';
-  el.querySelector('.ts-badge').textContent='RUNNING';
-  testState[id]='running';
-
-  const phaseMap={ts1:'p1',ts2:'p1',ts3:'p1',ts4:'p2',ts5:'p2',ts6:'p2',ts7:'p3',ts8:'p3',ts9:'p3'};
-  const phase=phaseMap[id];
-
-  setTimeout(()=>{
-    const passed=Math.random()>0.15;
-    el.className='test-scenario '+(passed?'passed':'failed');
-    el.querySelector('.ts-icon').textContent=passed?'✓':'✗';
-    el.querySelector('.ts-badge').textContent=passed?'PASSED':'FAILED';
-    testState[id]=passed?'passed':'failed';
-    updatePhaseProgress(phase);
-  },1200+Math.random()*1000);
-}
-
-function updatePhaseProgress(phase){
-  const phaseTests={p1:['ts1','ts2','ts3'],p2:['ts4','ts5','ts6'],p3:['ts7','ts8','ts9']};
-  const tests=phaseTests[phase];
-  const done=tests.filter(t=>testState[t]==='passed').length;
-  const pct=Math.round((done/tests.length)*100);
-  document.getElementById(phase+'pct').textContent=pct+'%';
-  document.getElementById(phase+'bar').style.width=pct+'%';
-}
-
-// ── TECH CARDS ──
-function toggleTech(el){
-  const wasExpanded=el.classList.contains('expanded');
-  document.querySelectorAll('.tech-card').forEach(c=>c.classList.remove('expanded'));
-  if(!wasExpanded) el.classList.add('expanded');
-}
-</script>
+<script src="script.js"></script>
 </body>
 </html>
