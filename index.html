@@ -1272,14 +1272,14 @@ function startSim(){
     document.getElementById('stat-rf').textContent=currentPhase;
     document.getElementById('stat-edge').textContent=`${(3+Math.random()*1.5).toFixed(1)}ms`;
 
-    const fp=totalReadings>0?((suppressCount/Math.max(1,totalReadings-passCount))*100).toFixed(1):0;
+    const fp=totalReadings>0?((suppressCount/Math.max(1,totalReadings))*100).toFixed(1):0;
     const fr=totalReadings>0?((suppressCount/totalReadings)*100).toFixed(1):0;
     document.getElementById('fpDisplay').textContent=fp+'%';
     document.getElementById('fpDisplay').className='mr-val '+(fp<10?'good':'warn');
     document.getElementById('filterRate').textContent=fr+'%';
     document.getElementById('filterRate').className='mr-val neutral';
 
-    drawChart('chart1',data1,550,Math.max(950,bl.t1+200),'°C');
+    drawChart('chart1',data1,Math.min(350,bl.t1-150),Math.max(950,bl.t1+200),'°C');
     drawChart('chart2',data2,2600,Math.max(3400,bl.h1+300),'PSI');
   },180);
 }
@@ -1316,7 +1316,7 @@ function resetSim(){
   document.getElementById('alertFeed').innerHTML='<div class="alert-item"><div class="alert-time">00:00</div><div class="alert-status ok">SYS</div><div class="alert-msg">System reset. Ready to start.</div></div>';
   updatePipelineDots(false);
   ['kalman','lstm','iso','rf','edge'].forEach(s=>document.getElementById('stat-'+s).textContent='—');
-  drawChart('chart1',data1,Math.min(400,bl.t1-100),Math.max(950,bl.t1+200),'°C');
+  drawChart('chart1',data1,350,950,'°C');
   drawChart('chart2',data2,2600,3400,'PSI');
 }
 
