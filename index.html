@@ -1316,7 +1316,7 @@ function resetSim(){
   document.getElementById('alertFeed').innerHTML='<div class="alert-item"><div class="alert-time">00:00</div><div class="alert-status ok">SYS</div><div class="alert-msg">System reset. Ready to start.</div></div>';
   updatePipelineDots(false);
   ['kalman','lstm','iso','rf','edge'].forEach(s=>document.getElementById('stat-'+s).textContent='—');
-  drawChart('chart1',data1,550,950,'°C');
+  drawChart('chart1',data1,Math.min(400,bl.t1-100),Math.max(950,bl.t1+200),'°C');
   drawChart('chart2',data2,2600,3400,'PSI');
 }
 
